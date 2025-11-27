@@ -1,0 +1,13 @@
+[workspace]
+members = [
+    "crates/boids-core",
+    "crates/boids-desktop",
+    "crates/boids-web",
+    "crates/boids-esp32",
+]
+resolver = "3"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+authors = ["aaadam3042@gmail.com"]
