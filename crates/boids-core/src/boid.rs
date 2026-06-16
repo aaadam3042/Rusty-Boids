@@ -21,8 +21,13 @@ impl Boid {
     }
 }
 
-pub fn init_boids() -> Vec<Boid> {
+pub fn init_boids<R: Rng>(rng: &mut R, area_size: Vec2, boid_count: usize) -> Vec<Boid> {
     // Generate a given amount of boids in random positions
-    // We need the Rng and area size as well, as well as amount of boids. This feels like it should take 
-    // a struct of params. Maybe we load rng in using a separate funciton, but that shouldnt exist on a boid
+    // NOTE: Consider moving out to world especially if we need more params
+    // NOTE: Should we consider loading RNG in some other way
+    let mut boids = Vec::<Boid>::new();
+    for _ in 0..boid_count {
+        boids.push(Boid::random_in(rng, area_size));
+    }
+    boids
 }
