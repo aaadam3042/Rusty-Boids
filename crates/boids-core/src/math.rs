@@ -2,8 +2,8 @@ use core::ops::{Add, Sub, Mul, Div};
 
 #[derive(Clone, Copy)]
 pub struct Vec2 {
-    x: f32,
-    y: f32
+    pub x: f32,
+    pub y: f32
 }
 
 impl Add for Vec2 {
@@ -39,6 +39,8 @@ impl Div<f32> for Vec2 {
 }
 
 impl Vec2 {
+    pub const ZERO: Self = Self {x: 0.0, y: 0.0};
+
     pub fn new(x: f32, y:f32) -> Self {
         Self {x: x, y: y}
     }
