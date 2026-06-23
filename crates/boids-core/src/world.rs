@@ -1,18 +1,23 @@
-use crate::boid::Boid;
-use crate::simulation_params::SimulationParams;
+use rand_core::Rng;
+
+use crate::boid::{self, Boid};
+use crate::params::{SimulationParams, WorldParams};
 
 pub struct World {
     boids: Vec<Boid>,
-
-    height: f32,
-    width: f32,
-
-    params: SimulationParams,
+    sim_params: SimulationParams,
+    world_params: WorldParams,
 }
 
 impl World {
-    fn new(boids: Vec<Boid>, height: f32, width: f32, params: SimulationParams) -> Self {
-        Self {boids: boids, height: height, width: width, params: params}
+    fn new<R: Rng>(rng:&mut R, sim_params: SimulationParams, world_params: WorldParams) -> Self {
+        let boids = boid::init_boids(rng, world_params.area_size, world_params.boid_count);
+
+        Self {boids: boids, sim_params: sim_params, world_params: world_params}
+    }
+
+    fn new_default_params<R: Rng>(rng:&mut R) -> Self {
+        Self::new(rng, SimulationParams::default(), WorldParams::default())
     }
 
     fn tick(&mut self, dt: i32) {

@@ -1,0 +1,46 @@
+use crate::math::Vec2;
+
+pub enum WrapMode {
+    Wrap,
+    Bounce
+}
+
+pub struct SimulationParams {
+    pub max_speed: f32,
+    pub max_force: f32,
+    pub neighbour_radius: f32,
+    pub separation_radius: f32,
+    pub alignment_weight: f32,
+    pub cohesion_weight: f32,
+    pub separation_weight: f32,
+    pub wrap_mode: WrapMode
+}
+
+impl Default for SimulationParams {
+    fn default() -> Self {
+        Self {
+            max_speed: 4.0,
+            max_force: 0.1,
+            neighbour_radius: 50.0,
+            separation_radius: 20.0,
+            alignment_weight: 1.0,
+            cohesion_weight: 1.0,
+            separation_weight: 1.5,
+            wrap_mode: WrapMode::Wrap,
+        }
+    }
+}
+
+pub struct WorldParams {
+    pub area_size: Vec2,
+    pub boid_count: usize,
+}
+
+impl Default for WorldParams {
+    fn default() -> Self {
+        Self {
+            area_size: Vec2::new(100f32, 100f32),
+            boid_count: 2,
+        }
+    }
+}

@@ -27,7 +27,7 @@ pub fn init_boids<R: Rng>(rng: &mut R, area_size: Vec2, boid_count: usize) -> Ve
     // NOTE: Should we consider loading RNG in some other way
     let mut boids = Vec::<Boid>::new();
     for _ in 0..boid_count {
-        boids.push(Boid::random_in(rng, area_size));
+        boids.push(Boid::random_in(rng, area_size)); 
     }
     boids
 }

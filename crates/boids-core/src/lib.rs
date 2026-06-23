@@ -1,7 +1,7 @@
 mod boid;
 mod math;
 mod world;
-mod simulation_params;
+mod params;
 
 pub fn add(left: u64, right: u64) -> u64 {
     left + right
