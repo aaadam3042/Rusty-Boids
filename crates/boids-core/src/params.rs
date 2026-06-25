@@ -5,15 +5,13 @@ pub enum WrapMode {
     Bounce
 }
 
+/// Parameters related to the simulation.
+/// Some parameters are designed to be tuneable by users:
+///    - alignment
+///    - cohesion
+///    - neighbour
+///    - separation 
 pub struct SimulationParams {
-    /* 
-    Parameters related to the simulation.
-    Some parameters are designed to be tuneable by users:
-        - alignment
-        - cohesion
-        - neighbour
-        - separation 
-    */
     pub max_speed: f32,
     pub max_force: f32,
     pub alignment_weight: f32,
@@ -39,10 +37,9 @@ impl Default for SimulationParams {
     }
 }
 
+/// Parameters related to the world setup
 pub struct WorldParams {
-    /*
-    Parameters related to the world setup
-    */
+    
     pub area_size: Vec2,
     pub boid_count: usize,
 }
