@@ -1,6 +1,10 @@
 use core::ops::{Add, Sub, Mul, Div};
 use rand_core::Rng;
 
+pub fn random_index<R: Rng>(rng: &mut R, length: u32) -> u32 {
+    (rng.next_u32()) % length
+}
+
 pub fn random_range_f32<R: Rng>(rng: &mut R, min:f32, max: f32) -> f32 {
     min + (rng.next_u32() as f32 / core::u32::MAX as f32) * (max - min)
 }
