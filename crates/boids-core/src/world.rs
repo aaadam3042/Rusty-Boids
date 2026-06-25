@@ -12,33 +12,39 @@ pub struct World {
 
 impl World {
     fn new<R: Rng>(rng:&mut R, sim_params: SimulationParams, world_params: WorldParams) -> Self {
-        let mut world = Self {boids: Vec::new(), sim_params: sim_params, world_params: world_params};
+        let mut world = Self {
+            boids: Vec::new(), sim_params: sim_params, world_params: world_params
+        };
         world.init_boids(rng);
 
         world
     }
     
+    /// Create new World with param defaults defined in params.rs
     fn new_default_params<R: Rng>(rng:&mut R) -> Self {
         Self::new(rng, SimulationParams::default(), WorldParams::default())
     }
 
+    /// Clear and populate the specified number of boids in WorldParams in
+    /// random positions, with random starting velocities.
     fn init_boids<R: Rng>(&mut self, rng: &mut R) {
-        // Generate a given amount of boids in random positions
         self.boids.clear();
 
+        // Generate and push boids to instance's Boids
         for _ in 0..self.world_params.boid_count {
             let boid = self.random_boid(rng);
             self.boids.push(boid); 
         }
     }
 
+    /// Generates a random boid with random positions and velocity
     fn random_boid<R: Rng>(&mut self, rng: &mut R) -> Boid {
         let angle = math::random_range_f32(rng, 0.0, core::f32::consts::TAU);
         let min_speed = self.sim_params.max_speed * 0.4;
-        let speed = math::random_range_f32(rng, min_speed, self.sim_params.max_speed); // How to load max speed in
+        let speed = math::random_range_f32(rng, min_speed, self.sim_params.max_speed); 
 
         let start_velocity = Vec2::new(angle.cos(), angle.sin()) * speed;
-        // We dont actually want to use sin and cos if we are dealing with embedded. there may be
+        // TODO: We dont actually want to use sin and cos if we are dealing with embedded. there may be
         // implementations on esp32 hal but maybe we should try with a small direction lookup instead
         // As for our purposes we dont really need the full set of random directions anyway
         // Eventually the boids diverge and converge
