@@ -6,12 +6,20 @@ pub enum WrapMode {
 }
 
 pub struct SimulationParams {
+    /* 
+    Parameters related to the simulation.
+    Some parameters are designed to be tuneable by users:
+        - alignment
+        - cohesion
+        - neighbour
+        - separation 
+    */
     pub max_speed: f32,
     pub max_force: f32,
-    pub neighbour_radius: f32,
-    pub separation_radius: f32,
     pub alignment_weight: f32,
     pub cohesion_weight: f32,
+    pub neighbour_radius: f32,
+    pub separation_radius: f32,
     pub separation_weight: f32,
     pub wrap_mode: WrapMode
 }
@@ -32,6 +40,9 @@ impl Default for SimulationParams {
 }
 
 pub struct WorldParams {
+    /*
+    Parameters related to the world setup
+    */
     pub area_size: Vec2,
     pub boid_count: usize,
 }
