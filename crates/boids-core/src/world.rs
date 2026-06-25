@@ -4,6 +4,22 @@ use crate::boid::Boid;
 use crate::math::{self, Vec2};
 use crate::params::{SimulationParams, WorldParams};
 
+/* 
+Hard coded directions to avoid the use of trig functions. 
+Particularly for embedded application efficiency.
+*/
+const DIAGONAL_DIRECTION: f32 = 0.70710677;
+const STARTING_DIRECTIONS: [Vec2; 8] = [
+    Vec2 {x: 1.0, y: 0.0},
+    Vec2 {x: 0.0, y: 1.0},
+    Vec2 {x: -1.0, y: 0.0},
+    Vec2 {x: 0.0, y: -1.0},
+    Vec2 {x: DIAGONAL_DIRECTION, y: DIAGONAL_DIRECTION},
+    Vec2 {x: -DIAGONAL_DIRECTION, y: DIAGONAL_DIRECTION},
+    Vec2 {x: -DIAGONAL_DIRECTION, y: -DIAGONAL_DIRECTION},
+    Vec2 {x: DIAGONAL_DIRECTION, y: -DIAGONAL_DIRECTION}
+];
+
 pub struct World {
     boids: Vec<Boid>,
     sim_params: SimulationParams,
@@ -39,15 +55,15 @@ impl World {
 
     /// Generates a random boid with random positions and velocity
     fn random_boid<R: Rng>(&mut self, rng: &mut R) -> Boid {
-        let angle = math::random_range_f32(rng, 0.0, core::f32::consts::TAU);
-        let min_speed = self.sim_params.max_speed * 0.4;
+        // Define some minimum speed for random speed range. This is partially arbitrary right now
+        let min_speed = self.sim_params.max_speed * 0.25;
         let speed = math::random_range_f32(rng, min_speed, self.sim_params.max_speed); 
+        
+        // Randomly select pre-defined vectors to avoid trig function
+        let index = math::random_index(rng, STARTING_DIRECTIONS.len());
+        let direction_vector = STARTING_DIRECTIONS[index];
 
-        let start_velocity = Vec2::new(angle.cos(), angle.sin()) * speed;
-        // TODO: We dont actually want to use sin and cos if we are dealing with embedded. there may be
-        // implementations on esp32 hal but maybe we should try with a small direction lookup instead
-        // As for our purposes we dont really need the full set of random directions anyway
-        // Eventually the boids diverge and converge
+        let start_velocity = direction_vector * speed;
 
         let area_size = self.world_params.area_size;
         let x = math::random_range_f32(rng, 0.0, area_size.x);
