@@ -46,7 +46,7 @@ impl World {
     
     // 2. Lifecycle 
 
-    fn tick(&mut self, dt: i32) {
+    pub fn tick(&mut self, dt: i32) {
         /* for each boid:
         1. calculate steering force
         2. apply force
