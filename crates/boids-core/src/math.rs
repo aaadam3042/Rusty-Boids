@@ -55,15 +55,7 @@ impl Vec2 {
     }
 
     pub fn length_squared(&self) -> f32 {
-        self.x.powi(2) + self.y.powi(2)
-    }
-
-    pub fn length(&self) -> f32 {
-        self.length_squared().sqrt()
-    }
-
-    pub fn normalise(self) -> Self {
-        self/self.length()
+        (self.x * self.x) + (self.y * self.y)
     }
 
     pub fn limit_length(self, limit: f32) -> Self {
@@ -72,5 +64,18 @@ impl Vec2 {
         } else {
             self
         }
+    }
+
+    /// ***Warning***: Uses libm::sqrtf so avoid if actual length is unneccesary 
+    /// and use length_squared instead. 
+    ///
+    /// eg: radius_squared == length_squared
+    pub fn length(&self) -> f32 {
+        libm::sqrtf(self.length_squared())
+    }
+
+    /// ***Warning***: Uses libm::sqrtf in self/self.length() so avoid if possible.
+    pub fn normalise(self) -> Self {
+        self/self.length()
     }
 }
