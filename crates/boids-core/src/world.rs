@@ -26,9 +26,8 @@ pub struct World {
     world_params: WorldParams,
 }
 
+// 1. World Constructors
 impl World {
-    // 1. Constructors
-
     /// Create a new world with given simulation params and world params structures
     pub fn new<R: Rng>(rng:&mut R, sim_params: SimulationParams, world_params: WorldParams) -> Self {
         let mut world = Self {
@@ -43,9 +42,10 @@ impl World {
     pub fn new_default_params<R: Rng>(rng:&mut R) -> Self {
         Self::new(rng, SimulationParams::default(), WorldParams::default())
     }
+}
     
-    // 2. Lifecycle 
-
+// 2. World Lifecycle 
+impl World {
     pub fn tick(&mut self, dt: i32) {
         /* for each boid:
         1. calculate steering force
@@ -54,15 +54,17 @@ impl World {
         4. handle world boundaries*/
         
     }
+}
     
-    // 3. Public accessors
-
+// 3. World Public accessors
+impl World {
     pub fn boids(&self) -> &[Boid] {
         &self.boids
     }
+}
 
-    // 4. Private Helpers
-
+// 4. World Private Helpers
+impl World {
     /// Clear and populate the specified number of boids in WorldParams in
     /// random positions, with random starting velocities.
     fn init_boids<R: Rng>(&mut self, rng: &mut R) {
@@ -93,7 +95,6 @@ impl World {
     
         Boid::new(Vec2::new(x, y), start_velocity)
     }
-
 }
 
 /// Calcuate the flocking behaviour steering force of a boid that ...
