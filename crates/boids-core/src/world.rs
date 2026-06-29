@@ -1,3 +1,4 @@
+use alloc::vec::Vec;
 use rand_core::Rng;
 
 use crate::boid::Boid;
