@@ -27,7 +27,10 @@ pub struct World {
 }
 
 impl World {
-    fn new<R: Rng>(rng:&mut R, sim_params: SimulationParams, world_params: WorldParams) -> Self {
+    // 1. Constructors
+
+    /// Create a new world with given simulation params and world params structures
+    pub fn new<R: Rng>(rng:&mut R, sim_params: SimulationParams, world_params: WorldParams) -> Self {
         let mut world = Self {
             boids: Vec::new(), sim_params: sim_params, world_params: world_params
         };
@@ -37,40 +40,11 @@ impl World {
     }
     
     /// Create new World with param defaults defined in params.rs
-    fn new_default_params<R: Rng>(rng:&mut R) -> Self {
+    pub fn new_default_params<R: Rng>(rng:&mut R) -> Self {
         Self::new(rng, SimulationParams::default(), WorldParams::default())
     }
-
-    /// Clear and populate the specified number of boids in WorldParams in
-    /// random positions, with random starting velocities.
-    fn init_boids<R: Rng>(&mut self, rng: &mut R) {
-        self.boids.clear();
-
-        // Generate and push boids to instance's Boids
-        for _ in 0..self.world_params.boid_count {
-            let boid = self.random_boid(rng);
-            self.boids.push(boid); 
-        }
-    }
-
-    /// Generates a random boid with random positions and velocity
-    fn random_boid<R: Rng>(&mut self, rng: &mut R) -> Boid {
-        // Define some minimum speed for random speed range. This is partially arbitrary right now
-        let min_speed = self.sim_params.max_speed * 0.25;
-        let speed = math::random_range_f32(rng, min_speed, self.sim_params.max_speed); 
-        
-        // Randomly select pre-defined vectors to avoid trig function
-        let index = math::random_index(rng, STARTING_DIRECTIONS.len());
-        let direction_vector = STARTING_DIRECTIONS[index];
-
-        let start_velocity = direction_vector * speed;
-
-        let area_size = self.world_params.area_size;
-        let x = math::random_range_f32(rng, 0.0, area_size.x);
-        let y = math::random_range_f32(rng, 0.0, area_size.y);
-
-        Boid::new(Vec2::new(x, y), start_velocity)
-    }
+    
+    // 2. Lifecycle 
 
     fn tick(&mut self, dt: i32) {
         /* for each boid:
@@ -78,10 +52,51 @@ impl World {
         2. apply force
         3. update position and velocity 
         4. handle world boundaries*/
-
+        
     }
+    
+    // 3. Public accessors
 
-    fn get_boids(&self) -> &[Boid] {
+    pub fn boids(&self) -> &[Boid] {
         &self.boids
     }
+
+    // 4. Private Helpers
+
+    /// Clear and populate the specified number of boids in WorldParams in
+    /// random positions, with random starting velocities.
+    fn init_boids<R: Rng>(&mut self, rng: &mut R) {
+        self.boids.clear();
+    
+        // Generate and push boids to instance's Boids
+        for _ in 0..self.world_params.boid_count {
+            let boid = self.random_boid(rng);
+            self.boids.push(boid); 
+        }
+    }
+    
+    /// Generates a random boid with random positions and velocity
+    fn random_boid<R: Rng>(&self, rng: &mut R) -> Boid {
+        // Define some minimum speed for random speed range. This is partially arbitrary right now
+        let min_speed = self.sim_params.max_speed * 0.25;
+        let speed = math::random_range_f32(rng, min_speed, self.sim_params.max_speed); 
+        
+        // Randomly select pre-defined vectors to avoid trig function
+        let index = math::random_index(rng, STARTING_DIRECTIONS.len());
+        let direction_vector = STARTING_DIRECTIONS[index];
+    
+        let start_velocity = direction_vector * speed;
+    
+        let area_size = self.world_params.area_size;
+        let x = math::random_range_f32(rng, 0.0, area_size.x);
+        let y = math::random_range_f32(rng, 0.0, area_size.y);
+    
+        Boid::new(Vec2::new(x, y), start_velocity)
+    }
+
+}
+
+/// Calcuate the flocking behaviour steering force of a boid that ...
+fn calculate_flocking_force(boid: Boid) -> Vec2 {
+    
 }
