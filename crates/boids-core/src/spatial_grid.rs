@@ -17,6 +17,7 @@ pub struct SpatialGrid {
     cells: Vec<BoidIndices>
 }
 
+// 1. Public spatial grid functions
 impl SpatialGrid {
     pub fn new(area_size: Vec2, neighbour_radius: f32) -> Self {
         assert!(area_size.x.is_finite());
@@ -92,7 +93,10 @@ impl SpatialGrid {
         }
         nearby_boid_indices.clone()
     } 
+}
 
+// 2. Private spatial grid helpers
+impl SpatialGrid {
     /// Given a coordinate in the world, return the corresponding 2D spatial grid cell it is in
     fn position_to_cell_coord(&self, position: Vec2) -> (usize, usize) {
         // Corresponding cells is basic division, floored. Casting to usize trims the float, ie floors it 
