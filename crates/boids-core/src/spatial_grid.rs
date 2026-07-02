@@ -186,4 +186,137 @@ mod tests {
             );
         }
     }
+
+    #[test]
+    fn new_panic_invalid_neighbour_radius() {
+        let inputs = [
+            f32::NAN,
+            f32::INFINITY,
+            f32::NEG_INFINITY,
+            0.0f32,
+            -0.0f32,
+            -1.0f32
+        ];    
+
+        for input in inputs {
+            let result = std::panic::catch_unwind(|| {
+                SpatialGrid::new(Vec2::new(10.0f32, 10.0f32), input);
+            });
+
+            assert!(
+                result.is_err(),
+                "Expected SpatialGrid::new([10.0, 10.0], {input}) to panic"
+            );
+        }
+    }
+
+    #[test]
+    fn clear() {
+        let mut grid = SpatialGrid::new(Vec2::new(10.0f32, 10.0f32), 1.0f32);
+        grid.insert(0, Vec2::new(1.0f32, 1.0f32));
+        grid.insert(1, Vec2::new(2.0f32, 2.0f32));
+        grid.clear();
+
+        for cell in &grid.cells {
+            assert!(cell.is_empty(), "Expected cell to be empty after clear");
+        }
+    }
+
+    #[test]
+    fn is_cell_in_bounds() {
+        let grid = SpatialGrid::new(Vec2::new(10.0f32, 10.0f32), 1.0f32);
+        assert!(grid.is_cell_in_bounds(0, 0));
+        assert!(grid.is_cell_in_bounds(9, 9));
+        assert!(!grid.is_cell_in_bounds(-1, 0));
+        assert!(!grid.is_cell_in_bounds(0, -1));
+        assert!(!grid.is_cell_in_bounds(10, 0));
+        assert!(!grid.is_cell_in_bounds(0, 10));
+    }
+
+    #[test]
+    fn position_to_cell_coord() {
+        let grid = SpatialGrid::new(Vec2::new(10.0f32, 10.0f32), 1.0f32);
+        assert_eq!(grid.position_to_cell_coord(Vec2::new(0.0f32, 0.0f32)), (0, 0));
+        assert_eq!(grid.position_to_cell_coord(Vec2::new(9.9f32, 9.9f32)), (9, 9));
+        assert_eq!(grid.position_to_cell_coord(Vec2::new(10.0f32, 10.0f32)), (9, 9));
+        assert_eq!(grid.position_to_cell_coord(Vec2::new(-1.0f32, -1.0f32)), (0, 0));
+    }
+
+    #[test] 
+    fn cell_coord_to_index() {
+        let grid = SpatialGrid::new(Vec2::new(10.0f32, 10.0f32), 1.0f32);
+        assert_eq!(grid.cell_coord_to_index(0, 0), Some(0));
+        assert_eq!(grid.cell_coord_to_index(9, 9), Some(99));
+        assert_eq!(grid.cell_coord_to_index(10, 10), None);
+        assert_eq!(grid.cell_coord_to_index(5, 5), Some(55));
+    }
+
+    #[test]
+    fn complex_position_to_cell_coord_and_index() {
+        // Test case where the area size is larger and not necessarily a multiple of the cell size
+        let grid = SpatialGrid::new(Vec2::new(100.0f32, 225.0f32), 50.0f32);
+    
+        // Test multiple positions and their corresponding cell coordinates and indices
+        // Format: (position, expected_cell_coord, expected_index)
+        let test_cases = [
+            (Vec2::new(0.0f32, 0.0f32), (0, 0), Some(0)),
+            (Vec2::new(49.9f32, 49.9f32), (0, 0), Some(0)),
+            (Vec2::new(50.0f32, 50.0f32), (1, 1), Some(3)),
+            (Vec2::new(99.9f32, 99.9f32), (1, 1), Some(3)),
+            (Vec2::new(100.0f32, 100.0f32), (1, 2), Some(5)),
+            (Vec2::new(150.0f32, 200.0f32), (1, 4), Some(9)),
+            (Vec2::new(99.9f32, 224.9f32), (1, 4), Some(9)),
+            (Vec2::new(100.0f32, 225.0f32), (1, 4), Some(9)),
+            (Vec2::new(-10.0f32, -10.0f32), (0, 0), Some(0)),
+        ];
+
+        for (position, expected_coord, expected_index) in test_cases {
+            assert_eq!(grid.position_to_cell_coord(position), expected_coord, "Failed p2c for position: ({}, {})", position.x, position.y);
+            assert_eq!(grid.cell_coord_to_index(expected_coord.0, expected_coord.1), expected_index, "Failed c2i for position: ({}, {})", position.x, position.y);
+        }
+    }
+
+    #[test]
+    fn cell_search_range_for_radius() {
+        let grid = SpatialGrid::new(Vec2::new(10.0f32, 10.0f32), 1.0f32);
+        assert_eq!(grid.cell_search_range_for_radius(0.0f32), 0);
+        assert_eq!(grid.cell_search_range_for_radius(0.5f32), 1);
+        assert_eq!(grid.cell_search_range_for_radius(1.0f32), 1);
+        assert_eq!(grid.cell_search_range_for_radius(1.5f32), 2);
+        assert_eq!(grid.cell_search_range_for_radius(2.0f32), 2);
+        assert_eq!(grid.cell_search_range_for_radius(2.5f32), 3);
+        assert_eq!(grid.cell_search_range_for_radius(3.0f32), 3);
+        assert_eq!(grid.cell_search_range_for_radius(3.5f32), 4);
+        assert_eq!(grid.cell_search_range_for_radius(4.0f32), 4);
+        assert_eq!(grid.cell_search_range_for_radius(4.5f32), 5);
+        assert_eq!(grid.cell_search_range_for_radius(5.0f32), 5);
+    }
+
+    #[test]
+    fn insert_and_nearby_boid_indices() {
+        let mut grid = SpatialGrid::new(Vec2::new(10.0f32, 10.0f32), 1.0f32);
+        grid.insert(0, Vec2::new(1.0f32, 1.0f32));
+        grid.insert(1, Vec2::new(2.0f32, 2.0f32));
+        grid.insert(2, Vec2::new(3.0f32, 3.0f32));
+        grid.insert(3, Vec2::new(4.0f32, 4.0f32));
+        grid.insert(4, Vec2::new(5.0f32, 5.0f32));
+
+        // Check search size is correct
+        assert_eq!(grid.cell_search_range_for_radius(1.0f32), 1, "Expected cell search range for radius 1.0 to be 1");
+
+        let nearby_indices = grid.nearby_boid_indices(Vec2::new(2.0f32, 2.0f32), 1.0f32);
+        assert_eq!(nearby_indices.len(), 3, "Expected 3 nearby boid indices, got {}", nearby_indices.len());
+        assert!(nearby_indices.contains(&0), "Expected nearby boid indices to contain 0");
+        assert!(nearby_indices.contains(&1), "Expected nearby boid indices to contain 1");
+        assert!(nearby_indices.contains(&2), "Expected nearby boid indices to contain 2");
+
+        // Now try with a larger radius that includes more boids
+        assert_eq!(grid.cell_search_range_for_radius(1.5f32), 2, "Expected cell search range for radius 1.5 to be 2");
+        let nearby_indices_large_radius = grid.nearby_boid_indices(Vec2::new(2.0f32, 2.0f32), 1.5f32);
+        assert_eq!(nearby_indices_large_radius.len(), 4, "Expected 4 nearby boid indices, got {}", nearby_indices_large_radius.len());
+        assert!(nearby_indices_large_radius.contains(&0), "Expected nearby boid indices to contain 0");
+        assert!(nearby_indices_large_radius.contains(&1), "Expected nearby boid indices to contain 1");
+        assert!(nearby_indices_large_radius.contains(&2), "Expected nearby boid indices to contain 2");
+        assert!(nearby_indices_large_radius.contains(&3), "Expected nearby boid indices to contain 3");
+    }   
 }
