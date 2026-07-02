@@ -1,5 +1,3 @@
-use rand_core::Rng;
-
 use crate::math::{self, Vec2};
 
 pub struct Boid {
