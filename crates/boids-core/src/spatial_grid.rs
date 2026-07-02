@@ -1,5 +1,4 @@
 use alloc::{vec, vec::Vec};
-use libm;
 
 use crate::math::Vec2;
 
@@ -154,4 +153,37 @@ impl SpatialGrid {
         range
     }
 
+}
+
+#[cfg(test)] 
+mod tests {
+    extern crate std;
+    use super::*;
+
+    #[test]
+    fn new_panic_invalid_area_size() {
+        let inputs = [
+            Vec2::new(f32::NAN, 10.0f32),
+            Vec2::new(10.0f32, f32::NAN),
+            Vec2::new(f32::INFINITY, 10.0f32),
+            Vec2::new(10.0f32, f32::NEG_INFINITY),
+            Vec2::new(0.0, 10.0f32),
+            Vec2::new(10.0f32, -0.0),
+            Vec2::new(-10.0, 10.0f32),
+            Vec2::new(10.0f32, -10.0)
+        ];
+
+        for input in inputs {
+            let result = std::panic::catch_unwind(|| {
+                SpatialGrid::new(input, 1.0f32);                
+            });
+
+            let debug_x = input.x;
+            let debug_y = input.y;
+            assert!(
+                result.is_err(), 
+                "Expected SpatialGrid::new([{debug_x}, {debug_y}], 1.0f32) to panic"
+            );
+        }
+    }
 }
