@@ -58,14 +58,6 @@ impl Vec2 {
         (self.x * self.x) + (self.y * self.y)
     }
 
-    pub fn limit_length(self, limit: f32) -> Self {
-        if self.length_squared() > limit * limit {
-            self.normalise() * limit
-        } else {
-            self
-        }
-    }
-
     /// ***Warning***: Uses libm::sqrtf so avoid if actual length is unneccesary 
     /// and use length_squared instead. 
     ///
@@ -77,5 +69,15 @@ impl Vec2 {
     /// ***Warning***: Uses libm::sqrtf in self/self.length() so avoid if possible.
     pub fn normalise(self) -> Self {
         self/self.length()
+    }
+
+    /// ***Warning***: Uses libm::sqrtf in self.length() through self.normalise(),
+    /// so avoid if possible. However, it only uses it if the length is greater than the limit.
+    pub fn limit_length(self, limit: f32) -> Self {
+        if self.length_squared() > limit * limit {
+            self.normalise() * limit
+        } else {
+            self
+        }
     }
 }
