@@ -1,8 +1,9 @@
 use crate::math::{self, Vec2};
 
+#[derive(Clone)]
 pub struct Boid {
-    position: Vec2,
-    velocity: Vec2
+    pub position: Vec2,
+    pub velocity: Vec2
 }
 
 impl Boid {

@@ -24,7 +24,7 @@ pub struct SimulationParams {
 
 impl Default for SimulationParams {
     fn default() -> Self {
-        Self {
+        let default = Self {
             max_speed: 4.0,
             max_force: 0.1,
             neighbour_radius: 50.0,
@@ -33,7 +33,13 @@ impl Default for SimulationParams {
             cohesion_weight: 1.0,
             separation_weight: 1.5,
             wrap_mode: WrapMode::Wrap,
-        }
+        };
+        
+        assert!(
+            default.neighbour_radius >= default.separation_radius, 
+            "Default neighbour radius must be greater than default separation radius"
+        );
+        default
     }
 }
 
