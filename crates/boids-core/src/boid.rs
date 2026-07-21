@@ -1,4 +1,4 @@
-use crate::math::{self, Vec2};
+use crate::math::Vec2;
 
 #[derive(Clone)]
 pub struct Boid {
