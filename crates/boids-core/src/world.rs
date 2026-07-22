@@ -53,29 +53,32 @@ impl World {
     
 // 2. World Lifecycle 
 impl World {
-    pub fn tick(&mut self, dt: i32) {
-        let boids_snapshot = self.boids.clone();
+    pub fn tick(&mut self, dt: f32) {
+        assert!(dt > 0.0, "dt must be greater than 0.0");
+        assert!(dt.is_finite(), "dt must be finite");
 
-        // Rebuild the spatial grid for this tick
+        // 1. Rebuild the spatial grid for this tick
         self.spatial_grid.clear();
-        for (index, boid) in boids_snapshot.iter().enumerate() {
+        for (index, boid) in self.boids.iter().enumerate() {
             self.spatial_grid.insert(index, boid.position);
         }
 
-        /* for each boid:
-        1. calculate steering force
-        2. apply force
-        3. update position and velocity 
-        4. handle world boundaries */
-        for (index, boid) in self.boids.iter_mut().enumerate() {
+        // 2. Calculate flocking forces before updating boids to avoid race
+        let mut steering_forces: Vec<Vec2> = Vec::with_capacity(self.boids.len());
+        for index in 0..self.boids.len() {
             let steering_force = calculate_flocking_force(
-                index, &boids_snapshot, &self.spatial_grid, &self.sim_params
+                index, &self.boids, &self.spatial_grid, &self.sim_params
             );
+            steering_forces.push(steering_force);
+        }
 
-            boid.apply_force(steering_force);
-            boid.update(dt);
+        // 3. Apply forces and update boids
+        for (index, boid) in self.boids.iter_mut().enumerate() {
+            boid.apply_force(steering_forces[index]);
+            boid.update(dt, self.sim_params.max_speed);
             boid.handle_boundaries(self.world_params.area_size, &self.sim_params.wrap_mode);
         }
+
     }
 }
     
@@ -116,7 +119,7 @@ impl World {
         let x = math::random_range_f32(rng, 0.0, area_size.x);
         let y = math::random_range_f32(rng, 0.0, area_size.y);
     
-        Boid::new(Vec2::new(x, y), start_velocity)
+        Boid::new(Vec2::new(x, y), start_velocity, Vec2::ZERO)
     }
 }
 
