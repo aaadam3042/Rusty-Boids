@@ -6,3 +6,5 @@ mod math;
 mod world;
 mod params;
 mod spatial_grid;
+
+pub use world::World;
