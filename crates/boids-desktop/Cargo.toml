@@ -5,3 +5,5 @@ edition.workspace = true
 authors.workspace = true
 
 [dependencies]
+boids-core = {path = "../boids-core"}
+eframe = "0.35.0"
