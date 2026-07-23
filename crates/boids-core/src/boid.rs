@@ -8,15 +8,15 @@ pub struct Boid {
 }
 
 impl Boid {
-    pub fn new(position: Vec2, velocity: Vec2, acceleration: Vec2) -> Self {
+    pub(crate) fn new(position: Vec2, velocity: Vec2, acceleration: Vec2) -> Self {
         Boid {position: position, velocity: velocity, acceleration: acceleration}
     }
 
-    pub fn apply_force(&mut self, force: Vec2) {
+    pub(crate) fn apply_force(&mut self, force: Vec2) {
         self.acceleration = self.acceleration + force;
     }
 
-    pub fn update(&mut self, dt: f32, max_speed: f32) {
+    pub(crate) fn update(&mut self, dt: f32, max_speed: f32) {
         assert!(dt > 0.0, "dt must be greater than 0.0");
         assert!(dt.is_finite(), "dt must be finite");
         assert!(max_speed > 0.0, "max_speed must be greater than 0.0");
@@ -26,12 +26,12 @@ impl Boid {
 
         // Limit the speed to max_speed
         self.velocity = self.velocity.limit_length(max_speed);
-
+        
         self.position = self.position + self.velocity * dt;
         self.acceleration = Vec2 {x: 0.0, y: 0.0};
     }
 
-    pub fn handle_boundaries(&mut self, world_dimension: Vec2, wrap_mode: &WrapMode) {
+    pub(crate) fn handle_boundaries(&mut self, world_dimension: Vec2, wrap_mode: &WrapMode) {
         match wrap_mode {
             WrapMode::Wrap => {
                 while self.position.x < 0.0 {
