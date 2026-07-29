@@ -54,7 +54,7 @@ impl Default for WorldParams {
     fn default() -> Self {
         Self {
             area_size: Vec2::new(500f32, 500f32),
-            boid_count: 2,
+            boid_count: 100,
         }
     }
 }
