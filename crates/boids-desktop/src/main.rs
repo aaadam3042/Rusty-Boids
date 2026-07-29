@@ -1,4 +1,4 @@
-use eframe::egui;
+use eframe::egui::{self};
 use std::time::Instant;
 
 const FIXED_DT: f32 = 1.0/120.0;
@@ -32,6 +32,43 @@ impl BoidsDesktopApp {
     }
 }
 
+impl BoidsDesktopApp {
+    fn paint_world(&self, ui: &mut egui::Ui) {
+        let canvas_rect = ui.available_rect_before_wrap();
+        let world_size = self.world.area_size();
+
+        // Calculate scale factor
+        let scale_x = canvas_rect.width() / world_size.x;
+        let scale_y = canvas_rect.height() / world_size.y;
+        let scale = scale_x.min(scale_y);
+
+        let displayed_size = egui::vec2(
+            world_size.x * scale,
+            world_size.y * scale,
+        );
+
+        let world_rect = egui::Rect::from_center_size(
+            canvas_rect.center(),
+            displayed_size,
+        );
+
+        let painter = ui.painter_at(canvas_rect);
+
+        painter.rect_filled(
+            canvas_rect, 
+            0.0,
+            egui::Color32::BLACK
+        );
+
+        painter.rect_stroke(
+            world_rect, 
+            0.0, 
+            egui::Stroke::new(1.0, egui::Color32::GRAY), 
+            egui::StrokeKind::Inside
+        );
+    }
+}
+
 impl eframe::App for BoidsDesktopApp {
     fn logic(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         let now = Instant::now();
@@ -53,6 +90,7 @@ impl eframe::App for BoidsDesktopApp {
 
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
         ui.label("Boids Desktop App");
-        // Here you can add more UI elements to control the simulation
+        
+        self.paint_world(ui);
     }
 }
