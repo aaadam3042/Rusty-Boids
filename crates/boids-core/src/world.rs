@@ -84,6 +84,10 @@ impl World {
     
 // 3. World Public accessors
 impl World {
+    pub fn area_size(&self) -> Vec2 {
+        self.world_params.area_size
+    }
+
     pub fn boids(&self) -> &[Boid] {
         &self.boids
     }
