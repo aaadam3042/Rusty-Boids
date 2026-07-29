@@ -25,8 +25,8 @@ pub struct SimulationParams {
 impl Default for SimulationParams {
     fn default() -> Self {
         let default = Self {
-            max_speed: 4.0,
-            max_force: 0.1,
+            max_speed: 80.0,
+            max_force: 20.0,
             neighbour_radius: 50.0,
             separation_radius: 20.0,
             alignment_weight: 1.0,
