@@ -1,7 +1,7 @@
-use eframe::egui::{self};
+use eframe::egui;
 use std::time::Instant;
 
-const FIXED_DT: f32 = 1.0/120.0;
+const FIXED_DT: f32 = 1.0 / 120.0;
 const MAX_FRAME_TIME: f32 = 0.1;
 
 fn main() -> eframe::Result {
@@ -33,27 +33,7 @@ impl BoidsDesktopApp {
 }
 
 impl BoidsDesktopApp {
-    fn paint_world(&self, ui: &mut egui::Ui) {
-        let canvas_rect = ui.available_rect_before_wrap();
-        let world_size = self.world.area_size();
-
-        // Calculate scale factor
-        let scale_x = canvas_rect.width() / world_size.x;
-        let scale_y = canvas_rect.height() / world_size.y;
-        let scale = scale_x.min(scale_y);
-
-        let displayed_size = egui::vec2(
-            world_size.x * scale,
-            world_size.y * scale,
-        );
-
-        let world_rect = egui::Rect::from_center_size(
-            canvas_rect.center(),
-            displayed_size,
-        );
-
-        let painter = ui.painter_at(canvas_rect);
-
+    fn paint_world(&self,painter: &egui::Painter, canvas_rect: egui::Rect, world_rect: egui::Rect) {
         painter.rect_filled(
             canvas_rect, 
             0.0,
@@ -66,6 +46,22 @@ impl BoidsDesktopApp {
             egui::Stroke::new(1.0, egui::Color32::GRAY), 
             egui::StrokeKind::Inside
         );
+    }
+
+    fn paint_boids(&self, painter: &egui::Painter, world_rect: egui::Rect, scale: f32) {
+        for boid in self.world.boids() {
+            let screen_position = world_to_screen(
+                boid.position,
+                world_rect,
+                scale
+            );
+
+            painter.circle_filled(
+                screen_position,
+                3.0,
+                egui::Color32::LIGHT_BLUE
+            );
+        }
     }
 }
 
@@ -89,8 +85,38 @@ impl eframe::App for BoidsDesktopApp {
     }
 
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
-        ui.label("Boids Desktop App");
+        let canvas_rect = ui.available_rect_before_wrap();
+        let world_size = self.world.area_size();
+
+        if world_size.x <= 0.0 || world_size.y <= 0.0 {
+            return;
+        }
+
+        // Calculate scale factor
+        let scale_x = canvas_rect.width() / world_size.x;
+        let scale_y = canvas_rect.height() / world_size.y;
+        let scale = scale_x.min(scale_y);
+
+        let displayed_size = egui::vec2(
+            world_size.x * scale,
+            world_size.y * scale,
+        );
+
+        let world_rect = egui::Rect::from_center_size(
+            canvas_rect.center(),
+            displayed_size,
+        );
+
+        let painter = ui.painter_at(canvas_rect);
         
-        self.paint_world(ui);
+        self.paint_world(&painter, canvas_rect, world_rect);
+        self.paint_boids(&painter, world_rect, scale);
     }
+}
+
+fn world_to_screen(position: boids_core::Vec2, world_rect: egui::Rect, scale: f32) -> egui::Pos2 {
+    egui::pos2(
+        world_rect.left() + position.x * scale,
+        world_rect.top() + position.y * scale
+    )
 }
