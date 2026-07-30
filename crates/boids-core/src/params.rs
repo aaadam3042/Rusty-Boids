@@ -12,27 +12,35 @@ pub enum WrapMode {
 ///    - neighbour
 ///    - separation 
 pub struct SimulationParams {
+    pub preferred_speed: f32,
     pub max_speed: f32,
     pub max_force: f32,
+
+    pub propulsion_weight: f32,
     pub alignment_weight: f32,
     pub cohesion_weight: f32,
+    pub separation_weight: f32,
+
     pub neighbour_radius: f32,
     pub separation_radius: f32,
-    pub separation_weight: f32,
     pub wrap_mode: WrapMode
 }
 
 impl Default for SimulationParams {
     fn default() -> Self {
         let default = Self {
-            max_speed: 80.0,
-            max_force: 20.0,
+            preferred_speed: 200.0,
+            max_speed: 300.0,
+            max_force: 70.0,
+
+            propulsion_weight: 5.0,
+            alignment_weight: 5.0,
+            cohesion_weight: 5.0,
+            separation_weight: 5.0,
+
             neighbour_radius: 50.0,
             separation_radius: 20.0,
-            alignment_weight: 1.0,
-            cohesion_weight: 1.0,
-            separation_weight: 1.5,
-            wrap_mode: WrapMode::Wrap,
+            wrap_mode: WrapMode::Bounce,
         };
         
         assert!(

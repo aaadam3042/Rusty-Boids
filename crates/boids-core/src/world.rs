@@ -137,9 +137,9 @@ fn calculate_flocking_force(index: usize, boids: &[Boid], spatial_grid: &Spatial
     let current_boid = &boids[index];
 
     // Accumulators
-    let mut alignment_force = Vec2::ZERO;
-    let mut cohesion_force = Vec2::ZERO;
-    let mut separation_force = Vec2::ZERO;
+    let mut alignment_sum = Vec2::ZERO;
+    let mut cohesion_sum = Vec2::ZERO;
+    let mut separation_sum = Vec2::ZERO;
 
     let neighbour_radius_sq = sim_params.neighbour_radius * sim_params.neighbour_radius;
     let separation_radius_sq = sim_params.separation_radius * sim_params.separation_radius;
@@ -152,8 +152,9 @@ fn calculate_flocking_force(index: usize, boids: &[Boid], spatial_grid: &Spatial
     let mut neighbour_count = 0;
     let mut separation_count = 0;
     for neighbour_index in neighbour_indices {
+        // Skip self
         if neighbour_index == index {
-            continue; // Skip self
+            continue; 
         }
 
         let neighbour_boid = &boids[neighbour_index];
@@ -168,56 +169,74 @@ fn calculate_flocking_force(index: usize, boids: &[Boid], spatial_grid: &Spatial
         neighbour_count = neighbour_count + 1;
 
         // Alignment: Steer towards the average heading of local flockmates
-        alignment_force = alignment_force + neighbour_boid.velocity;
+        alignment_sum = alignment_sum + neighbour_boid.velocity;
 
         // Cohesion: Steer to move toward the average position of local flockmates
-        cohesion_force = cohesion_force + neighbour_boid.position;
+        cohesion_sum = cohesion_sum + neighbour_boid.position;
 
         // Separation: Steer to avoid crowding local flockmates
         if distance_squared > 0.001 && distance_squared < separation_radius_sq {
             let diff = current_boid.position - neighbour_boid.position;
-            separation_force = separation_force + diff / distance_squared; // Weight by distance_squared
+            let strength = separation_radius_sq / distance_squared - 1.0;
+            separation_sum = separation_sum + diff * strength;
             separation_count = separation_count + 1;
         }   
     }
 
-    // Calculate the average alignment and cohesion forces
-    if neighbour_count > 0 {
-        let neighbour_count_f = neighbour_count as f32;
+    // Alignment
+    let alignment_force =
+        if neighbour_count > 0 {
+            let neighbour_count_f =
+                neighbour_count as f32;
 
-        // Alignment
-        let average_velocity = alignment_force / neighbour_count_f;
-        alignment_force = average_velocity - current_boid.velocity;
+            let average_velocity =
+                alignment_sum
+                    / neighbour_count_f;
 
-        // Cohesion
-        let average_position = cohesion_force / neighbour_count_f;
-        let direction_to_center = average_position - current_boid.position;
-        let desired_velocity = direction_to_center.limit_length(sim_params.max_speed);
-        cohesion_force = desired_velocity - current_boid.velocity;
-    } else {
-        alignment_force = Vec2::ZERO;
-        cohesion_force = Vec2::ZERO;
-    }
+            average_velocity
+                - current_boid.velocity
+        } else {
+            Vec2::ZERO
+        };
 
-    if separation_count > 0 {
-        let separation_count_f = separation_count as f32;
+    // Cohesion
+    let cohesion_force =
+        if neighbour_count > 0 {
+            let neighbour_count_f =
+                neighbour_count as f32;
 
-        let average_avoidance = separation_force / separation_count_f;
-        let desired_velocity = average_avoidance.limit_length(sim_params.max_speed);
-        separation_force = desired_velocity - current_boid.velocity;
-    } else {
-        separation_force = Vec2::ZERO;
-    }
+            let average_position =
+                cohesion_sum
+                    / neighbour_count_f;
 
-    // Apply weights from SimulationParams
-    alignment_force = alignment_force * sim_params.alignment_weight;
-    cohesion_force = cohesion_force * sim_params.cohesion_weight;
-    separation_force = separation_force * sim_params.separation_weight;
+            average_position
+                - current_boid.position
+        } else {
+            Vec2::ZERO
+        };
 
-    // Combine the forces
-    let mut steering_force = alignment_force + cohesion_force + separation_force;
-    steering_force = steering_force.limit_length(sim_params.max_force);
+    // Separation
+    let separation_force =
+        if separation_count > 0 {
+            separation_sum / separation_count as f32
+        } else {
+            Vec2::ZERO
+        };
 
-    steering_force
+    let speed_squared = current_boid.velocity.length_squared();
+
+    let preferred_speed_squared = sim_params.preferred_speed * sim_params.preferred_speed;
+    let speed_error = 1.0 - speed_squared / preferred_speed_squared;
+    let propulsion_force = current_boid.velocity * speed_error * sim_params.propulsion_weight;
+
+    let steering_force =
+        alignment_force * sim_params.alignment_weight
+        + cohesion_force * sim_params.cohesion_weight
+        + separation_force * sim_params.separation_weight
+        + propulsion_force;
+
+    steering_force.limit_length(
+        sim_params.max_force,
+    )
 }
     
